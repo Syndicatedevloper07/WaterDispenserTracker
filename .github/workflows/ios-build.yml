@@ -1,0 +1,23 @@
+name: Build Unsigned iOS IPA
+on: workflow_dispatch # Allows you to manually trigger the build
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign
+      - name: Create IPA Structure
+        run: |
+          mkdir Payload
+          mv build/ios/iphoneos/Runner.app Payload/
+          zip -r FlutterApp.ipa Payload
+      - name: Upload Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-ipa
+          path: FlutterApp.ipa
